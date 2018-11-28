@@ -1,10 +1,16 @@
 package org.elasticsearch.gradle.precommit;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.util.PatternFilterable;
 import org.gradle.api.tasks.util.PatternSet;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,4 +46,37 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         this.getInputs().property("excludes", filesFilter.getExcludes());
         this.getInputs().property("rules", patterns);
     }
+
+    /** Adds a file glob pattern to be excluded */
+    public void exclude(String... excludes) {
+        filesFilter.exclude(excludes);
+    }
+
+    void rule(Map<String,String> props) {
+        String name = props.remove("name");
+        if (name == null) {
+            throw new InvalidUserDataException("Missing [name] for invalid pattern rule");
+        }
+        String pattern = props.remove("pattern")
+        if (pattern == null) {
+            throw new InvalidUserDataException("Missing [pattern] for invalid pattern rule")
+        }
+        if (props.isEmpty() == false) {
+            throw new InvalidUserDataException("Unknown arguments for ForbiddenPatterns rule mapping: ${props.keySet()}")
+        }
+        // TODO: fail if pattern contains a newline, it won't work (currently)
+        patterns.put(name, pattern);
+    }
+
+    /** Returns the files this task will check */
+    @InputFiles
+    FileCollection files() {
+        return null;
+    }
+
+    @TaskAction
+    void checkInvalidPatterns() { }
+
+    // iterate through patterns to find the right ones for nice error messages
+    void addErrorMessages(List<String> failures, File f, String line, int lineNumber) {}
 }
