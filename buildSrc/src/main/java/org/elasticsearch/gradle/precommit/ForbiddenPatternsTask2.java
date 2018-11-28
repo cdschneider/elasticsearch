@@ -36,5 +36,8 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
 
     public ForbiddenPatternsTask2() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
+
+        this.getInputs().property("excludes", filesFilter.getExcludes());
+        this.getInputs().property("rules", patterns);
     }
 }
