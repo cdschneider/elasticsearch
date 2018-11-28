@@ -57,12 +57,12 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         if (name == null) {
             throw new InvalidUserDataException("Missing [name] for invalid pattern rule");
         }
-        String pattern = props.remove("pattern")
+        String pattern = props.remove("pattern");
         if (pattern == null) {
-            throw new InvalidUserDataException("Missing [pattern] for invalid pattern rule")
+            throw new InvalidUserDataException("Missing [pattern] for invalid pattern rule");
         }
         if (props.isEmpty() == false) {
-            throw new InvalidUserDataException("Unknown arguments for ForbiddenPatterns rule mapping: ${props.keySet()}")
+            throw new InvalidUserDataException("Unknown arguments for ForbiddenPatterns rule mapping: ${props.keySet()}");
         }
         // TODO: fail if pattern contains a newline, it won't work (currently)
         patterns.put(name, pattern);
@@ -78,5 +78,5 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
     void checkInvalidPatterns() { }
 
     // iterate through patterns to find the right ones for nice error messages
-    void addErrorMessages(List<String> failures, File f, String line, int lineNumber) {}
+    void addErrorMessages(List<String> failures, File f, String line, int lineNumber) { }
 }
