@@ -207,6 +207,7 @@ if (project != rootProject) {
     exclude '**/*.wav'
     // the file that actually defines nocommit
     exclude '**/ForbiddenPatternsTask.groovy'
+    exclude '**/ForbiddenPatternsTask2.java'
   }
 
   namingConventions {
