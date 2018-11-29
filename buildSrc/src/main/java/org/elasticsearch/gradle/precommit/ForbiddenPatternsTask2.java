@@ -11,19 +11,18 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.util.PatternFilterable;
 import org.gradle.api.tasks.util.PatternSet;
-import org.gradle.internal.impldep.org.bouncycastle.util.io.Streams;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Checks for patterns in source files for the project which are forbidden.
@@ -40,8 +39,6 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         patterns.put("nocommit", "nocommit|NOCOMMIT");
         patterns.put("nocommit should be all lowercase or all uppercase", "((?i)nocommit)(?<!(nocommit|NOCOMMIT))");
         patterns.put("tab", "\t");
-
-        //nocommit
     }
 
     /** A pattern set of which files should be checked. */
