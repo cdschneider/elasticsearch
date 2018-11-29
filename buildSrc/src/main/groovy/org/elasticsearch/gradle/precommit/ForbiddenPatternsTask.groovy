@@ -127,4 +127,9 @@ public class ForbiddenPatternsTask extends DefaultTask {
             }
         }
     }
+
+    @OutputFile
+    public File getOutputMarker() {
+        return outputMarker;
+    }
 }
