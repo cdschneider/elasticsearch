@@ -14,11 +14,13 @@ import org.gradle.api.tasks.util.PatternSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -33,9 +35,11 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
     private static final Map<String, String> patterns = new HashMap<>();
     static {
         // add mandatory rules
-        patterns.put("nocommit", ""); //TODO escape patterns
-        patterns.put("nocommit should be all lowercase or all uppercase", "");
-        patterns.put("tab", "");
+        patterns.put("nocommit", "nocommit|NOCOMMIT");
+        patterns.put("nocommit should be all lowercase or all uppercase", "((?i)nocommit)(?<!(nocommit|NOCOMMIT))");
+        patterns.put("tab", "\t");
+
+        //nocommit
     }
 
     /** A pattern set of which files should be checked. */
@@ -54,8 +58,8 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
     public ForbiddenPatternsTask2() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
 
-        this.getInputs().property("excludes", filesFilter.getExcludes());
-        this.getInputs().property("rules", patterns);
+        getInputs().property("excludes", filesFilter.getExcludes());
+        getInputs().property("rules", patterns);
     }
 
     /** Adds a file glob pattern to be excluded */
@@ -94,7 +98,6 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         Pattern allPatterns = Pattern.compile("(" + String.join(")|(", patterns.values()) + ")");
         List<String> failures = new ArrayList<>();
         for (File f : files()) {
-
             /* TODO
             if (allPatterns.matcher(line).find()) {
                 addErrorMessages(failures, f, line, lineNumber);
