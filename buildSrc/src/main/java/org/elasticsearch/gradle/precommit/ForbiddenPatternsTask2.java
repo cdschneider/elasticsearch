@@ -11,17 +11,19 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.util.PatternFilterable;
 import org.gradle.api.tasks.util.PatternSet;
+import org.gradle.internal.impldep.org.bouncycastle.util.io.Streams;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Checks for patterns in source files for the project which are forbidden.
@@ -98,11 +100,21 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         Pattern allPatterns = Pattern.compile("(" + String.join(")|(", patterns.values()) + ")");
         List<String> failures = new ArrayList<>();
         for (File f : files()) {
-            /* TODO
-            if (allPatterns.matcher(line).find()) {
-                addErrorMessages(failures, f, line, lineNumber);
+            List<String> lines = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
+            List<Integer> invalidLines = IntStream.range(0, lines.size())
+                .filter(i -> allPatterns.matcher(lines.get(i)).find())
+                .boxed()
+                .collect(Collectors.toList());
+
+            String path = getProject().getRootProject().getProjectDir().toURI().relativize(f.toURI()).toString();
+            for (Integer l : invalidLines) {
+                String line = lines.get(l);
+                for (Map.Entry<String, String> pattern : patterns.entrySet()) {
+                    if (Pattern.compile(pattern.getValue()).matcher(line).find()) {
+                        failures.add("- " + pattern.getKey() + " on line " + l + " of " + path);
+                    }
+                }
             }
-            */
         }
         if (failures.isEmpty() == false) {
             throw new GradleException("Found invalid patterns:\n" + String.join("\n", failures));
@@ -110,15 +122,5 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
 
         outputMarker.getParentFile().mkdirs();
         Files.write(outputMarker.toPath(), "done".getBytes("UTF-8"));
-    }
-
-    // iterate through patterns to find the right ones for nice error messages
-    void addErrorMessages(List<String> failures, File f, String line, int lineNumber) {
-        String path = getProject().getRootProject().getProjectDir().toURI().relativize(f.toURI()).toString();
-        for (Map.Entry<String,String> pattern : patterns.entrySet()) {
-            if (Pattern.compile(pattern.getValue()).matcher(line).find()) {
-                failures.add("- " + pattern.getKey() + " on line " + lineNumber + " of " + path);
-            }
-        }
     }
 }
