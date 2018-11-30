@@ -56,7 +56,6 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
 
     public ForbiddenPatternsTask2() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
-
         getInputs().property("excludes", filesFilter.getExcludes());
         getInputs().property("rules", patterns);
     }
@@ -76,7 +75,8 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
             throw new InvalidUserDataException("Missing [pattern] for invalid pattern rule");
         }
         if (props.isEmpty() == false) {
-            throw new InvalidUserDataException("Unknown arguments for ForbiddenPatterns rule mapping: ${props.keySet()}");
+            throw new InvalidUserDataException("Unknown arguments for ForbiddenPatterns rule mapping: "
+                + props.keySet().toString());
         }
         // TODO: fail if pattern contains a newline, it won't work (currently)
         patterns.put(name, pattern);
