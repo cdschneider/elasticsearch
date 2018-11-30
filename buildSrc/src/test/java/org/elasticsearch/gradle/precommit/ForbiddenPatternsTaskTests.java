@@ -101,6 +101,27 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
         file.delete();
     }
 
+    public void testCheckInvalidPatternsWhenExcludingFiles() throws Exception {
+        Project project = createProject();
+        ForbiddenPatternsTask2 task = createTask(project);
+        task.exclude("**/*.java");
+
+        File file = new File(project.getProjectDir(), "src/main/java/FooBarMoot.java");
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        Files.write(file.toPath(), "\t".getBytes());
+
+        task.checkInvalidPatterns();
+
+        File outputMarker = new File(project.getBuildDir(), "markers/forbiddenPatterns");
+        Optional<String> result = Files.readAllLines(outputMarker.toPath(), StandardCharsets.UTF_8).stream().findFirst();
+
+        assertTrue(result.isPresent());
+        assertEquals("done", result.get());
+        
+        file.delete();
+    }
+
     private Project createProject() throws IOException {
         Project project = ProjectBuilder.builder().withProjectDir(temporaryFolder.newFolder()).build();
         project.getPlugins().apply(JavaPlugin.class);
