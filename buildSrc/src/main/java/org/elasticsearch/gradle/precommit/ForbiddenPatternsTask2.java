@@ -7,6 +7,7 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.util.PatternFilterable;
@@ -83,7 +84,7 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
 
             String path = getProject().getRootProject().getProjectDir().toURI().relativize(f.toURI()).toString();
             failures = invalidLines.stream()
-                .map(l -> new AbstractMap.SimpleEntry<>(l, lines.get(l)))
+                .map(l -> new AbstractMap.SimpleEntry<>(l+1, lines.get(l)))
                 .flatMap(kv -> patterns.entrySet().stream()
                     .filter(p -> Pattern.compile(p.getValue()).matcher(kv.getValue()).find())
                     .map(p -> "- " + p.getKey() + " on line " + kv.getKey() + " of " + path)
