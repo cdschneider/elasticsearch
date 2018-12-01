@@ -118,7 +118,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
         assertTrue(result.isPresent());
         assertEquals("done", result.get());
-        
+
         file.delete();
     }
 

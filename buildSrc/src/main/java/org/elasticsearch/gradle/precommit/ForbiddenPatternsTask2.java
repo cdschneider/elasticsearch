@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +29,6 @@ import java.util.stream.IntStream;
  * Checks for patterns in source files for the project which are forbidden.
  */
 public class ForbiddenPatternsTask2 extends DefaultTask {
-
-    @OutputFile
-    File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
 
     /** The rules: a map from the rule name, to a rule regex pattern. */
     private static final Map<String, String> patterns = new HashMap<>();
@@ -54,18 +52,62 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         .exclude("**/*.crt")
         .exclude("**/*.png");
 
+    File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
+
     public ForbiddenPatternsTask2() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
         getInputs().property("excludes", filesFilter.getExcludes());
         getInputs().property("rules", patterns);
     }
 
-    /** Adds a file glob pattern to be excluded */
+    @InputFiles
+    @SkipWhenEmpty
+    public FileCollection files() {
+        List<FileCollection> collections = new ArrayList<>();
+        for (SourceSet sourceSet : getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets()) {
+            collections.add(sourceSet.getAllSource().matching(filesFilter));
+        }
+        return getProject().files(collections.toArray());
+    }
+
+    @TaskAction
+    public void checkInvalidPatterns() throws IOException {
+        Pattern allPatterns = Pattern.compile("(" + String.join(")|(", patterns.values()) + ")");
+        List<String> failures = new ArrayList<>();
+        for (File f : files()) {
+            List<String> lines = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
+            List<Integer> invalidLines = IntStream.range(0, lines.size())
+                .filter(i -> allPatterns.matcher(lines.get(i)).find())
+                .boxed()
+                .collect(Collectors.toList());
+
+            String path = getProject().getRootProject().getProjectDir().toURI().relativize(f.toURI()).toString();
+            failures = invalidLines.stream()
+                .map(l -> new AbstractMap.SimpleEntry<>(l, lines.get(l)))
+                .flatMap(kv -> patterns.entrySet().stream()
+                    .filter(p -> Pattern.compile(p.getValue()).matcher(kv.getValue()).find())
+                    .map(p -> "- " + p.getKey() + " on line " + kv.getKey() + " of " + path)
+                )
+                .collect(Collectors.toList());
+        }
+        if (failures.isEmpty() == false) {
+            throw new GradleException("Found invalid patterns:\n" + String.join("\n", failures));
+        }
+
+        outputMarker.getParentFile().mkdirs();
+        Files.write(outputMarker.toPath(), "done".getBytes("UTF-8"));
+    }
+
+    @OutputFile
+    public File getOutputMarker() {
+        return outputMarker;
+    }
+
     public void exclude(String... excludes) {
         filesFilter.exclude(excludes);
     }
 
-    void rule(Map<String,String> props) {
+    public void rule(Map<String,String> props) {
         String name = props.remove("name");
         if (name == null) {
             throw new InvalidUserDataException("Missing [name] for invalid pattern rule");
@@ -80,44 +122,5 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
         }
         // TODO: fail if pattern contains a newline, it won't work (currently)
         patterns.put(name, pattern);
-    }
-
-    /** Returns the files this task will check */
-    @InputFiles
-    FileCollection files() {
-        List<FileCollection> collections = new ArrayList<>();
-        for (SourceSet sourceSet : getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets()) {
-            collections.add(sourceSet.getAllSource().matching(filesFilter));
-        }
-        return getProject().files(collections.toArray());
-    }
-
-    @TaskAction
-    void checkInvalidPatterns() throws IOException {
-        Pattern allPatterns = Pattern.compile("(" + String.join(")|(", patterns.values()) + ")");
-        List<String> failures = new ArrayList<>();
-        for (File f : files()) {
-            List<String> lines = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
-            List<Integer> invalidLines = IntStream.range(0, lines.size())
-                .filter(i -> allPatterns.matcher(lines.get(i)).find())
-                .boxed()
-                .collect(Collectors.toList());
-
-            String path = getProject().getRootProject().getProjectDir().toURI().relativize(f.toURI()).toString();
-            for (Integer l : invalidLines) {
-                String line = lines.get(l);
-                for (Map.Entry<String, String> pattern : patterns.entrySet()) {
-                    if (Pattern.compile(pattern.getValue()).matcher(line).find()) {
-                        failures.add("- " + pattern.getKey() + " on line " + l + " of " + path);
-                    }
-                }
-            }
-        }
-        if (failures.isEmpty() == false) {
-            throw new GradleException("Found invalid patterns:\n" + String.join("\n", failures));
-        }
-
-        outputMarker.getParentFile().mkdirs();
-        Files.write(outputMarker.toPath(), "done".getBytes("UTF-8"));
     }
 }
