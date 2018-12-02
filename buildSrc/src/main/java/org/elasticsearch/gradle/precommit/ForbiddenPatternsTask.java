@@ -53,7 +53,7 @@ public class ForbiddenPatternsTask extends DefaultTask {
         .exclude("**/*.crt")
         .exclude("**/*.png");
 
-    File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
+    private File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
 
     public ForbiddenPatternsTask() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
