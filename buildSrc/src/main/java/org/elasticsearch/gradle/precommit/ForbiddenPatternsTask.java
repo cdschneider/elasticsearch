@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
 /**
  * Checks for patterns in source files for the project which are forbidden.
  */
-public class ForbiddenPatternsTask2 extends DefaultTask {
+public class ForbiddenPatternsTask extends DefaultTask {
 
     /** The rules: a map from the rule name, to a rule regex pattern. */
     private static final Map<String, String> patterns = new HashMap<>();
@@ -55,7 +55,7 @@ public class ForbiddenPatternsTask2 extends DefaultTask {
 
     File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
 
-    public ForbiddenPatternsTask2() {
+    public ForbiddenPatternsTask() {
         setDescription("Checks source files for invalid patterns like nocommits or tabs");
         getInputs().property("excludes", filesFilter.getExcludes());
         getInputs().property("rules", patterns);

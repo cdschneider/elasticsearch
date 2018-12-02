@@ -24,7 +24,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
     public void testCheckInvalidPatternsWhenNoSourceFilesExist() throws Exception {
         Project project = createProject();
-        ForbiddenPatternsTask2 task = createTask(project);
+        ForbiddenPatternsTask task = createTask(project);
 
         task.checkInvalidPatterns();
 
@@ -37,7 +37,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
     public void testCheckInvalidPatternsWhenSourceFilesExistNoViolation() throws Exception {
         Project project = createProject();
-        ForbiddenPatternsTask2 task = createTask(project);
+        ForbiddenPatternsTask task = createTask(project);
 
         String line = "public void bar() {}";
         File file = new File(project.getProjectDir(), "src/main/java/Foo.java");
@@ -58,7 +58,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
     public void testCheckInvalidPatternsWhenSourceFilesExistHavingTab() throws Exception {
         Project project = createProject();
-        ForbiddenPatternsTask2 task = createTask(project);
+        ForbiddenPatternsTask task = createTask(project);
 
         String line = "\tpublic void bar() {}";
         File file = new File(project.getProjectDir(), "src/main/java/Bar.java");
@@ -82,7 +82,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
         rule.put("pattern", "\\/\\/.*(?i)TODO");
 
         Project project = createProject();
-        ForbiddenPatternsTask2 task = createTask(project);
+        ForbiddenPatternsTask task = createTask(project);
         task.rule(rule);
 
         List<String> lines = Arrays.asList("GOOD LINE", "//todo", "// some stuff, toDo");
@@ -103,7 +103,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
     public void testCheckInvalidPatternsWhenExcludingFiles() throws Exception {
         Project project = createProject();
-        ForbiddenPatternsTask2 task = createTask(project);
+        ForbiddenPatternsTask task = createTask(project);
         task.exclude("**/*.java");
 
         File file = new File(project.getProjectDir(), "src/main/java/FooBarMoot.java");
@@ -128,7 +128,7 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
         return project;
     }
 
-    private ForbiddenPatternsTask2 createTask(Project project) {
-        return project.getTasks().create("forbiddenPatterns", ForbiddenPatternsTask2.class);
+    private ForbiddenPatternsTask createTask(Project project) {
+        return project.getTasks().create("forbiddenPatterns", ForbiddenPatternsTask.class);
     }
 }
