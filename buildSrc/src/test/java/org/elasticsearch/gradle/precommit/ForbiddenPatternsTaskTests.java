@@ -5,6 +5,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -52,8 +53,6 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
         assertTrue(result.isPresent());
         assertEquals("done", result.get());
-
-        file.delete();
     }
 
     public void testCheckInvalidPatternsWhenSourceFilesExistHavingTab() throws Exception {
@@ -72,8 +71,6 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
         } catch (GradleException e) {
             assertTrue(e.getMessage().startsWith("Found invalid patterns"));
         }
-
-        file.delete();
     }
 
     public void testCheckInvalidPatternsWithCustomRule() throws Exception {
@@ -97,8 +94,6 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
         } catch (GradleException e) {
             assertTrue(e.getMessage().startsWith("Found invalid patterns"));
         }
-
-        file.delete();
     }
 
     public void testCheckInvalidPatternsWhenExcludingFiles() throws Exception {
@@ -118,8 +113,6 @@ public class ForbiddenPatternsTaskTests extends GradleUnitTestCase {
 
         assertTrue(result.isPresent());
         assertEquals("done", result.get());
-
-        file.delete();
     }
 
     private Project createProject() throws IOException {
