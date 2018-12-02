@@ -31,16 +31,9 @@ import java.util.stream.IntStream;
  */
 public class ForbiddenPatternsTask extends DefaultTask {
 
-    /** The rules: a map from the rule name, to a rule regex pattern. */
-    private static final Map<String, String> patterns = new HashMap<>();
-    static {
-        // add mandatory rules
-        patterns.put("nocommit", "nocommit|NOCOMMIT");
-        patterns.put("nocommit should be all lowercase or all uppercase", "((?i)nocommit)(?<!(nocommit|NOCOMMIT))");
-        patterns.put("tab", "\t");
-    }
-
-    /** A pattern set of which files should be checked. */
+    /*
+     * A pattern set of which files should be checked.
+     */
     private final PatternFilterable filesFilter = new PatternSet()
         // we always include all source files, and exclude what should not be checked
         .include("**")
@@ -52,6 +45,17 @@ public class ForbiddenPatternsTask extends DefaultTask {
         .exclude("**/*.jks")
         .exclude("**/*.crt")
         .exclude("**/*.png");
+
+    /*
+     * The rules: a map from the rule name, to a rule regex pattern.
+     */
+    private static final Map<String, String> patterns = new HashMap<>();
+    static {
+        // add mandatory rules
+        patterns.put("nocommit", "nocommit|NOCOMMIT");
+        patterns.put("nocommit should be all lowercase or all uppercase", "((?i)nocommit)(?<!(nocommit|NOCOMMIT))");
+        patterns.put("tab", "\t");
+    }
 
     private File outputMarker = new File(getProject().getBuildDir(), "markers/forbiddenPatterns");
 
@@ -96,7 +100,7 @@ public class ForbiddenPatternsTask extends DefaultTask {
         }
 
         outputMarker.getParentFile().mkdirs();
-        Files.write(outputMarker.toPath(), "done".getBytes("UTF-8"));
+        Files.write(outputMarker.toPath(), "done".getBytes(StandardCharsets.UTF_8));
     }
 
     @OutputFile
