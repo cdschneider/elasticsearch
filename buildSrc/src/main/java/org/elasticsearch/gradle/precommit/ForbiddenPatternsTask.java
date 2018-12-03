@@ -155,7 +155,7 @@ public class ForbiddenPatternsTask extends DefaultTask {
         for (Charset encoding : Arrays.asList(StandardCharsets.UTF_8, StandardCharsets.ISO_8859_1)) {
             try (Stream<String> stream = Files.lines(path, encoding)) {
                 return stream.collect(Collectors.toList());
-            } catch (Exception e){
+            } catch (IOException e){
                 continue;
             }
         }
